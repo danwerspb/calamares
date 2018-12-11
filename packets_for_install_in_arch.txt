@@ -1,0 +1,105 @@
+Build on arch linux
+
+#install group package
+#kf5 it kde desktop environment, dependency
+sudo pacman -S kf5 kf5-aids 
+# pythonqt
+sudo pacman -S pythonqt
+
+# base
+autoconf automake bison flex git libtool m4 make cmake extra-cmake-modules
+# yaourt
+binutils fakeroot gcc-multilib gcc-libs-multilib boost patch qt5-tools yaml-cpp kiconthemes kservice kio kparts qtcreator ack qt5-webengine
+# pacman
+binutils fakeroot gcc gcc-libs-multilib boost patch qt5-tools yaml-cpp kiconthemes kservice kio kparts qtcreator ack qt5-webengine kpmcore qt5-location icu qt5-declarative qt5-translations qt5-xmlpatterns
+
+
+Build on debian
+
+Change to testing repo or something 
+
+sudo sh -c "echo 'deb http://mirror.yandex.ru/debian testing main' >> /etc/apt/sources.list"
+
+#------------------------------------------------------------------------------#
+#                   OFFICIAL DEBIAN REPOS                    
+#------------------------------------------------------------------------------#
+
+###### Debian Main Repos
+deb http://ftp.ru.debian.org/debian/ testing main contrib non-free
+deb-src http://ftp.ru.debian.org/debian/ testing main contrib non-free
+
+deb http://ftp.ru.debian.org/debian/ testing-updates main contrib non-free
+deb-src http://ftp.ru.debian.org/debian/ testing-updates main contrib non-free
+
+deb http://security.debian.org/ testing/updates main
+deb-src http://security.debian.org/ testing/updates main
+
+
+Install dependencies
+
+cmake debhelper extra-cmake-modules gettext kio-dev libatasmart-dev libboost-python-dev libkf5config-dev libkf5coreaddons-dev libkf5i18n-dev libkf5iconthemes-dev libkf5package-dev libkf5parts-dev libkf5plasma-dev libkf5service-dev libkf5solid-dev libparted-dev libpolkit-qt5-1-dev libqt5svg5-dev libqt5webkit5-dev libyaml-cpp-dev os-prober pkg-config pkg-kde-tools python3-dev qtbase5-dev qtdeclarative5-dev qttools5-dev qttools5-dev-tools libkf5crash-dev qtwebengine5-dev libpythonqt3.0 libkpmcore-dev libpythonqt-qtall-qt5-common-dev libpwquality-common libpwquality-dev libpwquality-tools libpwquality1
+
+In debian 9 - libkpmcore4-dev
+In debian 10 - libpythonqt-qtall-qt5-common-dev 
+
+# library path for packets
+libpythonqt-dev - /usr/include/PythonQt
+libpythonqt-qtall-qt5-common-dev - /usr/include/PythonQt5
+
+change CMakeModules/FindPythonQt.cmake:
+include/PythonQt/ to include/PythonQt5/
+
+change src/libcalamaresui/modulesystem/PythonQtViewModule.cpp:
+include <PythonQt_QtAll.h>
+
+# need symlink for right path library on debian 10
+#ln -s /usr/include/PythonQt5 /usr/include/PythonQt
+
+#здесь меняем на имя библиотеки какая есть в системе.
+#PYTHONQT_LIBRARY_DEBUG:FILEPATH=/usr/lib/libPythonQt.so.3.0.0
+#PYTHONQT_LIBRARY_RELEASE:FILEPATH=/usr/lib/libPythonQt.so.3.0.0
+
+------------------------------------------------------------------------------
+
+Кратки отчет о сборке и pull request.
+В результате экспериментов, для сборки calamres на debian 9 мне понадобилось поменять репозитории на testing.
+Я воспользовался сервисом https://debgen.simplylinux.ch/. 
+
+Проставил зависимости:
+cmake debhelper extra-cmake-modules gettext kio-dev libatasmart-dev libboost-python-dev libkf5config-dev libkf5coreaddons-dev libkf5i18n-dev libkf5iconthemes-dev libkf5package-dev libkf5parts-dev libkf5plasma-dev libkf5service-dev libkf5solid-dev libparted-dev libpolkit-qt5-1-dev libqt5svg5-dev libqt5webkit5-dev libyaml-cpp-dev os-prober pkg-config pkg-kde-tools python3-dev qtbase5-dev qtdeclarative5-dev qttools5-dev qttools5-dev-tools libkf5crash-dev qtwebengine5-dev libpythonqt3.0 libkpmcore-dev libpythonqt-qtall-qt5-common-dev libpwquality-common libpwquality-dev libpwquality-tools libpwquality1
+
+Потребовалось установить отдельный пакет - libpythonqt-qtall-qt5-common-dev. Предыдущую версию пришлось удалить - libpythonqt-dev.
+
+В исходном коде потребовалось внести изменения.
+
+Сhange CMakeModules/FindPythonQt.cmake:
+include/PythonQt/ to include/PythonQt5/
+
+Сhange src/libcalamaresui/modulesystem/PythonQtViewModule.cpp:
+include <PythonQt_QtAll.h>
+
+После этого сборка на debian 9 прошла успешно.
+
+PR - https://github.com/calamares/calamares/pull/1024
+
+------------------------------------------------------------------------------
+A summary of the build report and pull request.
+As a result of experiments, to build calamres on Debian 9, i needed to change the repositories on testing.
+I used the service https://debgen.simplylinux.ch/.
+
+Install dependencies:
+cmake debhelper extra-cmake-modules gettext kio-dev libatasmart-dev libboost-python-dev libkf5config-dev libkf5coreaddons-dev libkf5i18n-dev libkf5iconthemes-dev libkf5package-dev libkf5parts-dev libkf5plasma-dev libkf5service-dev libkf5solid-dev libparted-dev libpolkit-qt5-1-dev libqt5svg5-dev libqt5webkit5-dev libyaml-cpp-dev os-prober pkg-config pkg-kde-tools python3-dev qtbase5-dev qtdeclarative5-dev qttools5-dev qttools5-dev-tools libkf5crash-dev qtwebengine5-dev libpythonqt3.0 libkpmcore-dev libpythonqt-qtall-qt5-common-dev libpwquality-common libpwquality-dev libpwquality-tools libpwquality1
+
+It was necessary to install a separate package - libpythonqt-qtall-qt5-common-dev. The previous version had to be deleted - libpythonqt-dev.
+
+The source code required changes.
+
+Сhange CMakeModules / FindPythonQt.cmake:
+include / PythonQt / to include / PythonQt5 /
+
+Сhange src / libcalamaresui / modulesystem / PythonQtViewModule.cpp:
+include <PythonQt_QtAll.h>
+
+After that, the build on Debian 9 was successful.
+
+PR - https://github.com/calamares/calamares/pull/1024
